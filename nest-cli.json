@@ -36,6 +36,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/order_and_product/tsconfig.app.json"
       }
+    },
+    "user_service": {
+      "type": "application",
+      "root": "apps/user_service",
+      "entryFile": "main",
+      "sourceRoot": "apps/user_service/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/user_service/tsconfig.app.json"
+      }
     }
   }
 }

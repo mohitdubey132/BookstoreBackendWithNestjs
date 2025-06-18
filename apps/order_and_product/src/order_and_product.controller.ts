@@ -9,9 +9,7 @@ export class OrderAndProductController {
   ) {}
   @MessagePattern('create_order')
   async handleOrder(data: any) {
-    // const createdOrder = await this.orderService.createOrder(data);
     console.log(data);
-
     return { success: true, message: 'Order Created' };
   }
 }

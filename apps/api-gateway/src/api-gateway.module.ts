@@ -12,6 +12,15 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         options: {
           urls: ['amqp://admin:admin@localhost:5672'],
           queue: 'orders_queue',
+          queueOptions: { durable: true, messageTtl: 6000 },
+        },
+      },
+         {
+        name: 'USER_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: ['amqp://admin:admin@localhost:5672'],
+          queue: 'user_queue',
           queueOptions: { durable: false, messageTtl: 6000 },
         },
       },
