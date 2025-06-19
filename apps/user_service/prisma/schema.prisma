@@ -13,13 +13,27 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-model User{
-  id String @id @default(uuid())
-  name String 
-  emailId String?
+model User {
+  id           String    @id @default(uuid())
+  name         String
+  emailId      String?
   hashPassword String
-  mobileNo String  @db.VarChar(10)
-  userType UserTypes @default(normal)
+  mobileNo     String    @db.VarChar(10) @unique()
+  userType     UserTypes @default(normal)
+  Address      Address[]
+}
+
+model Address {
+  id        String  @id @default(uuid())
+  firstName String?
+  lastName  String?
+  landMark  String?
+  road      String?
+  city      String
+  pinCode   String
+  mobileNo String
+  user_id   User    @relation(fields: [userId], references: [id])
+  userId    String
 }
 
 enum UserTypes {

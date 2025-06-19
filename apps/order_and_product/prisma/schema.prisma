@@ -15,7 +15,109 @@ datasource db {
 }
 
 model Product {
-  id   String  @id @default(uuid())
-  name String
-  price Int 
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Int
+  stock       Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orderItems OrderItem[]
+  CartItem   CartItem[]
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  customerId  String // from external Customer microservice
+  totalAmount Int
+  status      OrderStatus @default(PENDING)
+  createdAt   DateTime    @default(now())
+
+  items           OrderItem[]
+  shippingAddress ShippingAddress?
+  payment         Payment?
+}
+
+model OrderItem {
+  id        String @id @default(uuid())
+  quantity  Int
+  unitPrice Int
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+
+  order   Order  @relation(fields: [orderId], references: [id])
+  orderId String
+}
+
+model ShippingAddress {
+  id      String @id @default(uuid())
+  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id])
+
+  firstName String
+  lastName  String
+  landMark  String
+  road      String
+  city      String
+  pinCode   String
+  mobileNo  String
+}
+
+model Payment {
+  id      String @id @default(uuid())
+  orderId String @unique
+  order   Order  @relation(fields: [orderId], references: [id])
+
+  amount      Int
+  method      PaymentMethod @default(COD)
+  status      PaymentStatus @default(PENDING)
+  collectedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING // order placed, not yet paid
+  SUCCESS // payment received
+  FAILED // payment failed/refused
+}
+
+enum PaymentMethod {
+  COD // Cash on Delivery
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  userId    String
+  status    CartStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  items CartItem[]
+}
+
+model CartItem {
+  id     String @id @default(uuid())
+  cartId String
+  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  unitPrice Int
+}
+
+enum CartStatus {
+  ACTIVE
+  CHECKED_OUT
+  ABANDONED
 }

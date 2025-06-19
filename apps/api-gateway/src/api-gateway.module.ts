@@ -15,7 +15,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
           queueOptions: { durable: true, messageTtl: 6000 },
         },
       },
-         {
+      {
         name: 'USER_SERVICE',
         transport: Transport.RMQ,
         options: {

@@ -14,7 +14,9 @@ export class PrismaClientService
     super({
       datasources: {
         db: {
-          url: 'postgresql://order_admin:order123@localhost:5433/order_and_product',
+          url:
+            process.env.DATABASE_URL ??
+            'postgresql://order_admin:order123@localhost:5433/order_and_product?schema=public',
         }, // please help i am not able to resolve this with env
       },
     });
