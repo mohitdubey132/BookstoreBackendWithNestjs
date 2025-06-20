@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClientService } from './prisma-client/prisma-client.service';
 import { Extensions } from '../generated/prisma/runtime/library';
-import { Address_DTO, tokenPayLoad, User } from './dto';
+import { Address_DTO, GetUserResponse, tokenPayLoad, User } from './dto';
 import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
 
@@ -103,6 +103,35 @@ export class UserServiceService {
       return { success: false, message: 'Internal server error' };
     }
   }
+  // get user
+  // async GetUser :Promise<GetUserResponse>(id: string) {
+  //   const user = await this?.prisma.user.findUnique({ where: { id: id } });
+  //   if (user?.id) {
+  //     return {
+  //       name: user.name,
+  //       email: user.emailId,
+  //       userType: user.userType,
+  //       mobile_no: user.mobileNo,
+  //       id: user.id,
+  //     };
+  //   }
+  //   return { message: 'no user found' };
+  // }
+  async GetUser(id: string): Promise<GetUserResponse> {
+  const user = await this.prisma.user.findUnique({ where: { id } });
+
+  if (user?.id) {
+    return {
+      id: user.id,
+      name: user.name,
+      email: user?.emailId,
+      userType: user.userType,
+      mobile_no: user.mobileNo,
+    };
+  }
+
+  return { message: 'no user found' }; // ✅ FIXED: lowercase message
+}
 
   // varify token
   async verifyToken(token: string) {
@@ -110,7 +139,11 @@ export class UserServiceService {
       const res = this.jwt.verify(token, {
         secret: process.env.secreat ?? 'xhbwhj#bjweec',
       });
-      return res; // token is valid, return payload
+      
+      return {
+        isValid: true,
+        res,
+      }; // token is valid, return payload
     } catch (error) {
       // token is invalid or expired
       return {

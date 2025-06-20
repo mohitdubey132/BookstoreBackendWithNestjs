@@ -7,6 +7,7 @@ import {
   isNotEmpty,
   IsNumber,
   isNumberString,
+  IsOptional,
   IsString,
   isString,
   MaxLength,
@@ -58,9 +59,22 @@ export class Address_DTO {
 
 export class tokenPayLoad {
   @IsString()
-  @IsNotEmpty()
+
   id: string;
   @IsString()
-  @IsEnum(UserTypes)
+
   userType: UserTypes;
 }
+export interface UserResponseDTO {
+  id: string;
+  name: string;
+  email: string | null;
+  userType: string; // Or use an enum if available
+  mobile_no: string;
+}
+
+export interface UserNotFoundDTO {
+  message: string;
+}
+
+export type GetUserResponse = UserResponseDTO | UserNotFoundDTO;

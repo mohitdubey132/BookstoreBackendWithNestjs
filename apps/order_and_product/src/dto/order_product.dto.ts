@@ -2,12 +2,14 @@ import { Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEnum,
+  IsIn,
   IsInt,
   IsNotEmpty,
   IsNumber,
   isNumber,
   IsNumberString,
   IsOptional,
+  isString,
   IsString,
   IsUUID,
   Min,
@@ -249,6 +251,25 @@ export class CreateCartItemDTO {
   @IsString()
   @IsNotEmpty()
   productId: string;
+  @IsNotEmpty()
+  @IsString()
+  cartId: string;
+  @IsInt()
+  @Min(1)
+  quantity: number;
+  @IsString()
+  @IsNotEmpty()
+  token: string;
+
+  @IsInt()
+  @Min(0)
+  unitPrice: number;
+}
+
+export class CreateCartIteFirstmDTO {
+  @IsString()
+  @IsNotEmpty()
+  productId: string;
 
   @IsInt()
   @Min(1)
@@ -258,11 +279,13 @@ export class CreateCartItemDTO {
   @Min(0)
   unitPrice: number;
 }
-
 export class CreateCartDTO {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   userId: string;
+  @IsString()
+  @IsNotEmpty()
+  token: string;
 
   @IsOptional()
   @IsEnum(CartStatus)
@@ -270,6 +293,50 @@ export class CreateCartDTO {
 
   @IsOptional()
   @ValidateNested({ each: true })
-  @Type(() => CreateCartItemDTO)
-  items?: CreateCartItemDTO[];
+  @Type(() => CreateCartIteFirstmDTO)
+  items?: CreateCartIteFirstmDTO[];
+}
+
+export class GetCheckoutDTO {
+  @IsNotEmpty()
+  @IsString()
+  token: string;
+  @IsNotEmpty()
+  @IsString()
+  checkoutId: string;
+}
+
+export class ModifyCartItemDTO {
+  @IsString()
+  @IsNotEmpty()
+  cartItemId: string;
+
+  @IsIn(['increase', 'decrease'])
+  action: 'increase' | 'decrease';
+  @IsString()
+  @IsNotEmpty()
+  token: string;
+}
+
+export class PlaceOrderDTO {
+  @IsString()
+  @IsNotEmpty()
+  cartId: string;
+
+  @IsString()
+  @IsOptional()
+  customerId: string;
+  @IsString()
+  @IsOptional()
+  customerName: string;
+  @IsString()
+  @IsOptional()
+  customerEmail: string;
+  @IsString()
+  @IsOptional()
+  customerPhone: string;
+
+  @IsNotEmpty()
+  @IsString()
+  token: string;
 }

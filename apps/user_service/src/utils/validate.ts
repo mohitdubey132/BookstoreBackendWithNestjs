@@ -11,9 +11,7 @@ export async function validatePayload<T>(
 
   if (errors.length > 0) {
     const errorMessages = errors
-      .map((e) =>
-        e.constraints ? Object.values(e.constraints).join(', ') : '',
-      )
+      .map((e) => (e.constraints ? Object.values(e.constraints).join(' ') : ''))
       .filter(Boolean)
       .join(', ');
 

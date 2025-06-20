@@ -28,11 +28,14 @@ model Product {
 }
 
 model Order {
-  id          String      @id @default(uuid())
-  customerId  String // from external Customer microservice
-  totalAmount Int
-  status      OrderStatus @default(PENDING)
-  createdAt   DateTime    @default(now())
+  id            String      @id @default(uuid())
+  customerId    String // from external Customer microservice
+  customerName  String
+  customerEmail String
+  customerPhone String
+  totalAmount   Int
+  status        OrderStatus @default(PENDING)
+  createdAt     DateTime    @default(now())
 
   items           OrderItem[]
   shippingAddress ShippingAddress?
@@ -103,13 +106,13 @@ model Cart {
   status    CartStatus @default(ACTIVE)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
-  items CartItem[]
+  items     CartItem[]
 }
 
 model CartItem {
-  id     String @id @default(uuid())
-  cartId String
-  cart   Cart   @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  id        String  @id @default(uuid())
+  cartId    String
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
   productId String
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int

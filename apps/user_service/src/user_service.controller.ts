@@ -1,9 +1,7 @@
-import {
-  Controller,
-} from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { UserServiceService } from './user_service.service';
 
-import { Address_DTO, tokenPayLoad, User } from './dto';
+import { Address_DTO, GetUserResponse, tokenPayLoad, User } from './dto';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { validatePayload } from './utils/validate';
 
@@ -67,7 +65,7 @@ export class UserServiceController {
     );
     const token = await this.userServiceService.signtoken({
       id: output?.User?.id,
-      userType: output.User?.userType ?? 'CUSTOMER', // default fallback
+      userType: output.User?.userType // default fallback
     });
     //  const output = await this.userServiceService.createUser(data)
     const user = {
@@ -86,7 +84,11 @@ export class UserServiceController {
   async verifyToken(token: string) {
     // console.log(token,typeof(token.token))
     const isValid = await this.userServiceService.verifyToken(token);
-
-    return { status: true, tokenIsValid: isValid };
+    let user: GetUserResponse;
+    if (isValid.isValid)
+    {  user = await this.userServiceService.GetUser(isValid?.res?.id);
+         return { status: isValid.isValid, tokenIsValid: isValid, user:user };
+    }
+    return { status: isValid.isValid, tokenIsValid: isValid };
   }
 }

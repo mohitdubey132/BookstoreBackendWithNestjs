@@ -1,7 +1,8 @@
 import { Body, Controller, Get, Inject, Post, Query } from '@nestjs/common';
 import { ApiGatewayService } from './api-gateway.service';
 import { ClientProxy } from '@nestjs/microservices';
-import { catchError, throwError, timeout } from 'rxjs';
+import { catchError, firstValueFrom, throwError, timeout } from 'rxjs';
+import { sendWithTimeout } from './helper/sendWithTimeOut';
 
 @Controller()
 export class ApiGatewayController {
@@ -11,8 +12,8 @@ export class ApiGatewayController {
     @Inject('USER_SERVICE') private readonly userClient: ClientProxy,
   ) {}
 
-  @Post('/orders/test')
-  async getOrderTest(@Body() data: any) {
+  @Post('/checkout')
+  async creatCheckout(@Body() data: any) {
     const result = this.orderClient.send('create_order', data).pipe(
       timeout(6000),
       catchError((err) => {
@@ -25,7 +26,43 @@ export class ApiGatewayController {
     );
     return result;
   }
+  @Post('/getCheckout')
+  async getCheckout(@Body() data: any) {
+    const result = await firstValueFrom(
+      sendWithTimeout(this.orderClient, 'getCheckout', data),
+    );
 
+    return result;
+  }
+    @Post('/placeOrder')
+  async createOrder(@Body() data: any) {
+    const result = await firstValueFrom(
+      sendWithTimeout(this.orderClient, 'confirmOrder', data),
+    );
+    return result;
+  }
+  @Post('/updateCartItem')
+  async updateCartItem(@Body() data: any) {
+    const result = await firstValueFrom(
+      sendWithTimeout(this.orderClient, 'updateCartItem', data),
+    );
+    return result;
+  }
+  // add_item'
+  @Post('/addItem')
+  async addTemInCart(@Body() data: any) {
+    const result = this.orderClient.send('add_item', data).pipe(
+      timeout(6000),
+      catchError((err) => {
+        console.error('Microservice error or timeout:', err.message);
+        return throwError(
+          () =>
+            new Error('Order Service is unavailable. Please try again later.'),
+        );
+      }),
+    );
+    return result;
+  }
   @Post('/user')
   async creatUser(@Body() data: any) {
     const result = this.userClient.send('create_user', data).pipe(
@@ -40,6 +77,8 @@ export class ApiGatewayController {
     );
     return result;
   }
+
+  
   // login
   @Post('/login')
   async loginUser(@Body() data: any) {
