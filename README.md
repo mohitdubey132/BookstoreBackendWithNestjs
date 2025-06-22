@@ -23,6 +23,18 @@ npm run start:dev user_service
 npm run start:dev order_and_product
 npm run start:dev api-gateway
 ```
+
+
+### migrate db for order and product service 
+##  apps/order_and_product
+npx prisma migrate deploy
+
+### migrate db for user service 
+##  apps/user_service
+npx prisma migrate deploy
+
+
+
 ### add .env file in apps/user_service with this key-vales 
 ```
 DATABASE_URL="postgresql://user_admin:secret123@localhost:5435/user_db?schema=public"
