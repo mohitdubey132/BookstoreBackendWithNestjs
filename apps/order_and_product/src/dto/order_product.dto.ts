@@ -4,6 +4,7 @@ import {
   IsEnum,
   IsIn,
   IsInt,
+  isNotEmpty,
   IsNotEmpty,
   IsNumber,
   isNumber,
@@ -23,6 +24,7 @@ export enum OrderStatus {
   SHIPPED = 'SHIPPED',
   DELIVERED = 'DELIVERED',
   CANCELLED = 'CANCELLED',
+  CANCEL_REQUESTED = "CANCEL_REQUESTED"
 }
 
 export enum PaymentStatus {
@@ -241,6 +243,12 @@ export class ProductQueryDTO {
   limit?: number;
 }
 
+export class ProductById {
+  @IsString()
+  @IsNotEmpty()
+  productId : string ;
+}
+
 export enum CartStatus {
   ACTIVE = 'ACTIVE',
   CHECKED_OUT = 'CHECKED_OUT',
@@ -317,6 +325,15 @@ export class ModifyCartItemDTO {
   @IsNotEmpty()
   token: string;
 }
+interface ShippingAddressDTO {
+  firstName: string;
+  lastName: string;
+  landMark: string;
+  road: string;
+  city: string;
+  pinCode: string;
+  mobileNo: string;
+}
 
 export class PlaceOrderDTO {
   @IsString()
@@ -339,4 +356,95 @@ export class PlaceOrderDTO {
   @IsNotEmpty()
   @IsString()
   token: string;
+
+  shippingAddress?: ShippingAddressDTO; // ✅ optional
+}
+
+export class GetUserOrderDTO{
+  @IsString()
+  @IsNotEmpty({message:"Please login "})
+
+  token :String;
+  @IsOptional()
+  @IsString()
+  userId : string;
+}
+
+export class GetOrdersDTO{
+  @IsString()
+  @IsNotEmpty({message:"Please login "})
+  token :String;
+}
+export class GetOrderDetails{
+  @IsString()
+  @IsNotEmpty({message:"Please login "})
+
+  token :String;
+  @IsOptional()
+  @IsString()
+  userId : string;
+
+  @IsString()
+  @IsNotEmpty()
+  orderId : string;
+}
+
+export class UpdateOrderStatusDTO extends GetOrderDetails {
+  @IsNotEmpty()
+  @IsEnum(OrderStatus)
+  status: OrderStatus;
+}
+
+
+export class CreateProductDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+  
+  @IsNotEmpty()
+  @IsString()
+  token :string ;
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsInt()
+  @Min(0)
+  price: number;
+
+  @IsInt()
+  @Min(0)
+  stock: number;
+
+  @IsOptional()
+  @IsString()
+  thumbnail?: string;
+}
+
+export class UpdateProductDto{
+    @IsString()
+  @IsNotEmpty()
+  name: string;
+  @IsNotEmpty()
+  @IsString()
+
+  id:string
+  @IsNotEmpty()
+  @IsString()
+  token :string ;
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsInt()
+  @Min(0)
+  price: number;
+
+  @IsInt()
+  @Min(0)
+  stock: number;
+
+  @IsOptional()
+  @IsString()
+  thumbnail?: string;
 }

@@ -4,10 +4,17 @@ import { PrismaClientService } from './prisma-client/prisma-client.service';
 import {
   CreateCartDTO,
   CreateCartItemDTO,
+  CreateProductDto,
   GetCheckoutDTO,
+  GetOrderDetails,
+  GetOrdersDTO,
+  GetUserOrderDTO,
   ModifyCartItemDTO,
   PlaceOrderDTO,
+  ProductById,
   ProductQueryDTO,
+  UpdateOrderStatusDTO,
+  UpdateProductDto,
 } from './dto';
 
 const prisma = new PrismaClient();
@@ -30,6 +37,19 @@ export class OrderAndProductService {
       };
     } else {
       return { products: [], success: false, message: 'no product found ' };
+    }
+  }
+   async fetchProduct(data:ProductById) {
+    const res = await this.prisma.product.findUnique({where:{id:data?.productId}});
+
+    if (res?.id) {
+      return {
+        product: res,
+        success: true,
+        message: 'here are all products ',
+      };
+    } else {
+      return { success: false, message: 'no product found ' };
     }
   }
   async fetchProducts1(query: ProductQueryDTO = {}) {
@@ -97,7 +117,11 @@ export class OrderAndProductService {
     });
 
     if (result.id) {
-      return result;
+      return {
+        success: true,
+        checkout: result,
+        message: 'checkout created ',
+      };
     } else {
       return {
         success: false,
@@ -117,9 +141,10 @@ export class OrderAndProductService {
         },
       })
       .catch((err) => {
+        console.log('err------------------------->', err.meta, err);
         errorNew = {
           success: false,
-          message: ' item not  add in cart ',
+          message: ' item not  add in cart err ' + err,
         };
       });
 
@@ -139,7 +164,11 @@ export class OrderAndProductService {
       .findUnique({
         where: { id: data.checkoutId },
         include: {
-          items: true,
+          items: {
+            include: {
+              product: true,
+            },
+          },
         },
       })
       .catch((err) => {
@@ -228,13 +257,13 @@ export class OrderAndProductService {
             message: 'Cart not found or is empty.',
           };
         }
-        
+
         if (cart.status !== 'ACTIVE') {
-  return {
-    success: false,
-    message: 'Order has already been placed for this cart.',
-  };
-} 
+          return {
+            success: false,
+            message: 'Order has already been placed for this cart.',
+          };
+        }
         // 2. Check stock
         for (const item of cart.items) {
           if (item.quantity > item.product.stock) {
@@ -265,9 +294,9 @@ export class OrderAndProductService {
             customerId: data.customerId,
             totalAmount,
             status: 'CONFIRMED',
-            customerEmail:data.customerEmail,
-            customerName:data.customerName,
-            customerPhone:data.customerPhone,
+            customerEmail: data.customerEmail,
+            customerName: data.customerName,
+            customerPhone: data.customerPhone,
             items: {
               create: cart.items.map((item) => ({
                 productId: item.productId,
@@ -285,6 +314,21 @@ export class OrderAndProductService {
           data: { status: 'CHECKED_OUT' },
         });
 
+        if (data.shippingAddress) {
+          await tx.shippingAddress.create({
+            data: {
+              orderId: order.id,
+              firstName: data.shippingAddress.firstName,
+              lastName: data.shippingAddress.lastName,
+              landMark: data.shippingAddress.landMark,
+              road: data.shippingAddress.road,
+              city: data.shippingAddress.city,
+              pinCode: data.shippingAddress.pinCode,
+              mobileNo: data.shippingAddress.mobileNo,
+            },
+          });
+        }
+
         // 7. Return success
         return {
           success: true,
@@ -301,4 +345,184 @@ export class OrderAndProductService {
         };
       });
   }
+
+  async getOrdersForUser(data: GetUserOrderDTO){
+        
+    // const orders = await this.prisma.order.findMany({where:{customerId:data?.userId}
+    // ,include:{
+    //   items:{}
+    // }})
+     const orders = await this.prisma.order.findMany({
+  where: { customerId: data?.userId },
+  include: {
+    _count: {
+      select: { items: true }
+    }
+  }
+});
+
+    if(orders.length>0){
+      return {
+        orders : orders,
+        success: true,
+        message:"List of all orders "
+      }
+    }
+    else{
+      return{
+        orders:{},
+        success:false,
+        message:"no ordr found "
+      }
+    }
+    
+
+  }
+    async getOrders(data: GetOrdersDTO){
+        
+    // const orders = await this.prisma.order.findMany({where:{customerId:data?.userId}
+    // ,include:{
+    //   items:{}
+    // }})
+     const orders = await this.prisma.order.findMany({
+  include: {
+    _count: {
+      select: { items: true }
+    }
+  }
+});
+
+    if(orders.length>0){
+      return {
+        orders : orders,
+        success: true,
+        message:"List of all orders "
+      }
+    }
+    else{
+      return{
+        orders:{},
+        success:false,
+        message:"no ordr found "
+      }
+    }
+  }
+    async getOrderDetails(data: GetOrderDetails){
+        
+    // const orders = await this.prisma.order.findMany({where:{customerId:data?.userId}
+    // ,include:{
+    //   items:{}
+    // }})
+     const orders = await this.prisma.order.findUnique({
+      where:{id:data.orderId},
+  include: {
+    shippingAddress:true,
+    items:{
+
+ include:{product:true}     
+    },
+    _count: {
+      select: { items: true }
+    }
+  }
+});
+   
+    if(orders?.id){
+      return {
+        order : orders,
+        success: true,
+        message:"order details  "
+      }
+    }
+    else{
+      return{
+        order:{},
+        success:false,
+        message:"no order found "
+      }
+    }
+    
+
+  }
+     async updateOrderStatus(data:UpdateOrderStatusDTO){
+      
+     const orders = await this.prisma.order.update({data:{status:data.status},where:{id:data.orderId},include:{
+      shippingAddress:true,
+      items:{include:{product:true}}
+     }});
+   
+    if(orders?.id){
+      return {
+        order : orders,
+        success: true,
+        message:"order status updated   "
+      }
+    }
+    else{
+      return{
+        order:{},
+        success:false,
+        message:"no order found "
+      }
+    }
+    
+
+  }
+
+    async createProduct(data: CreateProductDto) {
+    const product = await this.prisma.product.create({
+      data: {
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        stock: data.stock,
+        thumbnail: data.thumbnail,
+      },
+    });
+    if(product?.id){
+      return(
+        {
+          success:true,
+          product:product,
+          message:"product created "
+        }
+      )
+    }
+    else{
+          return {
+            success :false,
+            message :"product not created "
+          }
+    }
+  }
+
+  async updateProduct(data: UpdateProductDto) {
+  try {
+    const updatedProduct = await this.prisma.product.update({
+      where: {
+        id: data.id,
+      },
+      data: {
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        stock: data.stock,
+        thumbnail: data.thumbnail,
+      },
+    });
+
+    return {
+      success: true,
+      product: updatedProduct,
+      message: 'Product updated successfully',
+    };
+  } catch (error) {
+    console.error('Error updating product:', error);
+    return {
+      success: false,
+      message: 'Product update failed',
+    };
+  }
+}
+
 }

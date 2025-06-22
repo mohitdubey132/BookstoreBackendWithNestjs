@@ -22,7 +22,7 @@ model Product {
   stock       Int
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
+  thumbnail   String?
   orderItems OrderItem[]
   CartItem   CartItem[]
 }
@@ -59,12 +59,12 @@ model ShippingAddress {
   orderId String @unique
   order   Order  @relation(fields: [orderId], references: [id])
 
-  firstName String
-  lastName  String
-  landMark  String
-  road      String
-  city      String
-  pinCode   String
+  firstName String?
+  lastName  String?
+  landMark  String?
+  road      String?
+  city      String?
+  pinCode   String?
   mobileNo  String
 }
 
@@ -83,12 +83,17 @@ model Payment {
 }
 
 enum OrderStatus {
-  PENDING
-  CONFIRMED
-  SHIPPED
-  DELIVERED
-  CANCELLED
+  PENDING         // Order placed but not yet confirmed
+  CONFIRMED       // Order confirmed by admin
+  SHIPPED         // Order has been shipped
+  DELIVERED       // Order delivered to the customer
+  CANCELLED       // Order cancelled (after approval)
+  
+  CANCEL_REQUESTED  // Customer requested cancellation
+  RETURN_REQUESTED  // Customer requested a return
+  RETURNED          // Order returned and accepted
 }
+
 
 enum PaymentStatus {
   PENDING // order placed, not yet paid

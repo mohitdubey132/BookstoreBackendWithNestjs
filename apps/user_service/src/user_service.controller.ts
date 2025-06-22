@@ -21,21 +21,27 @@ export class UserServiceController {
     let token: any;
     if (validData) {
       output = await this.userServiceService.createUser(data);
-      token = await this.userServiceService.signtoken({
-        id: output.id,
-        userType: output.userType,
-      });
+      if (output.USER?.id) {
+        token = await this.userServiceService.signtoken({
+          id: output.id,
+          userType: output.userType,
+        });
+        return {
+          success: true,
+          user: output,
+          message: ' User has been created ',
+          token:token
+        };
+      } else {
+        return {
+          success: false,
+          message: 'User no create This mobile number is already registered ',
+        };
+      }
     }
     //  const output = await this.userServiceService.createUser(data)
     console.log(data, '--------------', validData);
-    return (
-      reserror ?? {
-        success: true,
-        message: 'Order Created',
-        data: output,
-        token: token,
-      }
-    );
+    return reserror;
   }
   // create address controller
   @MessagePattern('create_address')
@@ -63,9 +69,16 @@ export class UserServiceController {
       data.mobileNo,
       data.password,
     );
+
+    if (!output?.User?.id) {
+      return {
+        success: false,
+        message: 'Wrong user credentials',
+      };
+    }
     const token = await this.userServiceService.signtoken({
       id: output?.User?.id,
-      userType: output.User?.userType // default fallback
+      userType: output.User?.userType, // default fallback
     });
     //  const output = await this.userServiceService.createUser(data)
     const user = {
@@ -85,10 +98,24 @@ export class UserServiceController {
     // console.log(token,typeof(token.token))
     const isValid = await this.userServiceService.verifyToken(token);
     let user: GetUserResponse;
-    if (isValid.isValid)
-    {  user = await this.userServiceService.GetUser(isValid?.res?.id);
-         return { status: isValid.isValid, tokenIsValid: isValid, user:user };
+    if (isValid.isValid) {
+      user = await this.userServiceService.GetUser(isValid?.res?.id);
+      return { status: isValid.isValid, tokenIsValid: isValid, user: user };
     }
     return { status: isValid.isValid, tokenIsValid: isValid };
+  }
+
+    @MessagePattern('getuserInfo')
+  async getUserData( data:any) {
+    // console.log(token,typeof(token.token))
+    const isValid = await this.userServiceService.verifyToken(data?.token);
+    let user: GetUserResponse;
+    if (isValid.isValid) {
+      user = await this.userServiceService.GetUser(isValid?.res?.id);
+      return { success:true , user: user , message:"user details" };
+    }
+    return { 
+      success: false , message:"User details not found please login again "
+     };
   }
 }

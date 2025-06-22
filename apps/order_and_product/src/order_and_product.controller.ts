@@ -5,10 +5,18 @@ import {
   CreateCartDTO,
   CreateCartItemDTO,
   CreateFullOrderDTO,
+  CreateProductDto,
+  CreateProductDTO,
   GetCheckoutDTO,
+  GetOrderDetails,
+  GetOrdersDTO,
+  GetUserOrderDTO,
   ModifyCartItemDTO,
   PlaceOrderDTO,
+  ProductById,
   ProductQueryDTO,
+  UpdateOrderStatusDTO,
+  UpdateProductDto,
 } from './dto';
 import { validatePayload } from './utils/validate';
 import { catchError, firstValueFrom, throwError, timeout } from 'rxjs';
@@ -57,9 +65,7 @@ export class OrderAndProductController {
         } else {
           return {
             success: false,
-            message:
-              'user not found please login and try agin' +
-              JSON.stringify(result),
+            message: 'user not found please login and try agin',
           };
         }
       }
@@ -103,9 +109,7 @@ export class OrderAndProductController {
         } else {
           return {
             success: false,
-            message:
-              'user not found please login and try agin' +
-              JSON.stringify(result),
+            message: 'user not found please login and try agin',
           };
         }
       }
@@ -150,9 +154,7 @@ export class OrderAndProductController {
         } else {
           return {
             success: false,
-            message:
-              'user not found please login and try agin' +
-              JSON.stringify(result),
+            message: 'user not found please login and try agin',
           };
         }
       }
@@ -205,7 +207,7 @@ export class OrderAndProductController {
     return reserror;
   }
 
-   @MessagePattern('confirmOrder')
+  @MessagePattern('confirmOrder')
   async confirmOrder(data: PlaceOrderDTO) {
     let reserror: any;
     const validData = await validatePayload(PlaceOrderDTO, data)
@@ -232,19 +234,21 @@ export class OrderAndProductController {
 
         console.log('---------------------------------->', result);
         // return result;
-      // id
-      //    name: user.name,
-      // email: user?.emailId,
-      // userType: user.userType,
-      // mobile_no: user.mobileNo,
-        let newCartData: PlaceOrderDTO = { ...data,customerEmail:result.user.email,
-          customerName:result.user.name,customerPhone:result.user.mobile_no,
-        customerId:result.user.id };
+        // id
+        //    name: user.name,
+        // email: user?.emailId,
+        // userType: user.userType,
+        // mobile_no: user.mobileNo,
+        let newCartData: PlaceOrderDTO = {
+          ...data,
+          customerEmail: result.user.email,
+          customerName: result.user.name,
+          customerPhone: result.user.mobile_no,
+          customerId: result.user.id,
+        };
         if (result?.status === true) {
           const finalResult =
-            await this.orderAndProductService.placeOrderFromCart(
-              newCartData,
-            );
+            await this.orderAndProductService.placeOrderFromCart(newCartData);
           return finalResult;
         } else {
           return {
@@ -273,5 +277,321 @@ export class OrderAndProductController {
     const res = await this.orderAndProductService.fetchProducts1(query);
 
     return reserror ?? res;
+  }
+
+  @MessagePattern("getUserOrders")
+  async getUserOrder(data:GetUserOrderDTO){
+        let reserror: any;
+    const validData = await validatePayload(GetUserOrderDTO, data)
+      .then()
+      .catch((err) => {
+        console.log('ggggggggggggggggggggggggggggggg,', err.response);
+        reserror = err.response;
+      });
+        if (validData) {
+      if (data.token) {
+        const result: any = await firstValueFrom(
+          this.userClient.send('verifyToken', data.token).pipe(
+            timeout(6000),
+            catchError((err) => {
+              console.error('Microservice error or timeout:', err.message);
+              return throwError(
+                () =>
+                  new Error(
+                    'Order Service is unavailable. Please try again later.',
+                  ),
+              );
+            }),
+          ),
+        );
+
+        console.log('---------------------------------->', result);
+        // return result;
+        let newCartData: GetUserOrderDTO = { ...data ,userId:result.user.id };
+        if (result?.status === true) {
+          const finalResult =
+            await this.orderAndProductService.getOrdersForUser(newCartData);
+          return finalResult;
+        } else {
+          return {
+            success: false,
+            message: 'user not found please login and try agin',
+          };
+        }
+      }
+    }
+    return reserror;
+  }
+
+
+  @MessagePattern("getOrderDetails")
+  async getOrderDetails(data:GetOrderDetails){
+        let reserror: any;
+    const validData = await validatePayload(GetOrderDetails, data)
+      .then()
+      .catch((err) => {
+        console.log('ggggggggggggggggggggggggggggggg,', err.response);
+        reserror = err.response;
+      });
+        if (validData) {
+      if (data.token) {
+        const result: any = await firstValueFrom(
+          this.userClient.send('verifyToken', data.token).pipe(
+            timeout(6000),
+            catchError((err) => {
+              console.error('Microservice error or timeout:', err.message);
+              return throwError(
+                () =>
+                  new Error(
+                    'Order Service is unavailable. Please try again later.',
+                  ),
+              );
+            }),
+          ),
+        );
+
+        console.log('---------------------------------->', result);
+        // return result;
+        let newCartData: GetOrderDetails = { ...data };
+        if (result?.status === true) {
+          const finalResult =
+            await this.orderAndProductService.getOrderDetails(newCartData);
+          return finalResult;
+        } else {
+          return {
+            success: false,
+            message: 'user not found please login and try agin',
+          };
+        }
+      }
+    }
+    return reserror;
+  }
+    @MessagePattern("updateOrderStatus")
+  async updateOrderstatus(data:UpdateOrderStatusDTO){
+        let reserror: any;
+    const validData = await validatePayload(UpdateOrderStatusDTO, data)
+      .then()
+      .catch((err) => {
+        reserror = err.response;
+      });
+        if (validData)  {
+      if (data.token) {
+        const result: any = await firstValueFrom(
+          this.userClient.send('verifyToken', data.token).pipe(
+            timeout(6000),
+            catchError((err) => {
+              console.error('Microservice error or timeout:', err.message);
+              return throwError(
+                () =>
+                  new Error(
+                    'Order Service is unavailable. Please try again later.',
+                  ),
+              );
+            }),
+          ),
+        );
+
+        console.log('---------------------------------->', result);
+        // return result;
+        let newCartData: UpdateOrderStatusDTO = { ...data ,userId: result.user.id  };
+        if(data.status !== "CANCEL_REQUESTED" && result.user.userType==="normal")
+        {
+          return {
+            success:false,
+            message :"normal user not allowes to do this action "
+          }
+        }
+        if (result?.status === true) {
+          const finalResult =
+            await this.orderAndProductService.updateOrderStatus(newCartData);
+          return finalResult;
+        } else {
+          return {
+            success: false,
+            message: 'user not found please login and try agin',
+          };
+        }
+      }
+    }
+    return reserror;
+  }
+
+
+   @MessagePattern("getOrders")
+  async getOrder(data:GetOrdersDTO){
+        let reserror: any;
+    const validData = await validatePayload(GetOrdersDTO, data)
+      .then()
+      .catch((err) => {
+        console.log('ggggggggggggggggggggggggggggggg,', err.response);
+        reserror = err.response;
+      });
+        if (validData) {
+      if (data.token) {
+        const result: any = await firstValueFrom(
+          this.userClient.send('verifyToken', data.token).pipe(
+            timeout(6000),
+            catchError((err) => {
+              console.error('Microservice error or timeout:', err.message);
+              return throwError(
+                () =>
+                  new Error(
+                    'Order Service is unavailable. Please try again later.',
+                  ),
+              );
+            }),
+          ),
+        );
+
+        console.log('---------------------------------->', result);
+        // return result;
+        let newCartData: GetOrdersDTO = { ...data };
+
+           if( result.user.userType==="normal")
+        {
+          return {
+            success:false,
+            message :"normal user not allowes to access this route "
+          }
+        }
+        if (result?.status === true) {
+          const finalResult =
+            await this.orderAndProductService.getOrders(newCartData);
+          return finalResult;
+        } else {
+          return {
+            success: false,
+            message: 'user not found please login and try agin',
+          };
+        }
+      }
+    }
+    return reserror;
+  }
+   
+
+     @MessagePattern("createProduct")
+  async createProduct(data:CreateProductDto){
+        let reserror: any;
+    const validData = await validatePayload(CreateProductDto, data)
+      .then()
+      .catch((err) => {
+        console.log('ggggggggggggggggggggggggggggggg,', err.response);
+        reserror = err.response;
+      });
+        if (validData) {
+      if (data.token) {
+        const result: any = await firstValueFrom(
+          this.userClient.send('verifyToken', data.token).pipe(
+            timeout(6000),
+            catchError((err) => {
+              console.error('Microservice error or timeout:', err.message);
+              return throwError(
+                () =>
+                  new Error(
+                    'Order Service is unavailable. Please try again later.',
+                  ),
+              );
+            }),
+          ),
+        );
+
+        console.log('---------------------------------->', result);
+        // return result;
+        let newCartData: CreateProductDto = { ...data };
+
+           if( result.user.userType==="normal")
+        {
+          return {
+            success:false,
+            message :"normal user not allowes to access this route "
+          }
+        }
+        if (result?.status === true) {
+          const finalResult =
+            await this.orderAndProductService.createProduct(newCartData);
+          return finalResult;
+        } else {
+          return {
+            success: false,
+            message: 'user not found please login and try agin',
+          };
+        }
+      }
+    }
+    return reserror;
+  }
+    @MessagePattern("Product")
+    async getProduct(data:ProductById){
+            let reserror: any;
+    const validData = await validatePayload(ProductById, data)
+      .then()
+      .catch((err) => {
+        console.log('ggggggggggggggggggggggggggggggg,', err.response);
+        reserror = err.response;
+      });
+        if (validData) {
+      if (data.productId) {
+     
+            const finalResult =
+            await this.orderAndProductService.fetchProduct(data);
+          return finalResult;
+      
+      }
+    }
+    return reserror;
+    } 
+
+    @MessagePattern("updateProduct")
+  async updateProduct(data:UpdateProductDto){
+        let reserror: any;
+    const validData = await validatePayload(UpdateProductDto, data)
+      .then()
+      .catch((err) => {
+
+        reserror = err.response;
+      });
+        if (validData) {
+      if (data.token) {
+        const result: any = await firstValueFrom(
+          this.userClient.send('verifyToken', data.token).pipe(
+            timeout(6000),
+            catchError((err) => {
+              console.error('Microservice error or timeout:', err.message);
+              return throwError(
+                () =>
+                  new Error(
+                    'Order Service is unavailable. Please try again later.',
+                  ),
+              );
+            }),
+          ),
+        );
+
+        console.log('---------------------------------->', result);
+        // return result;
+        let newCartData: UpdateProductDto = { ...data };
+
+           if( result.user.userType==="normal")
+        {
+          return {
+            success:false,
+            message :"normal user not allowes to access  "
+          }
+        }
+        if (result?.status === true) {
+          const finalResult =
+            await this.orderAndProductService.updateProduct(newCartData);
+          return finalResult;
+        } else {
+          return {
+            success: false,
+            message: 'user not found please login and try agin',
+          };
+        }
+      }
+    }
+    return reserror;
   }
 }

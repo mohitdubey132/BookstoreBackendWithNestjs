@@ -22,7 +22,9 @@ export class UserServiceService {
           name: data.name,
           emailId: data.email,
           hashPassword: hash,
-        },
+
+        }
+        
       })
       .catch((err) => {
         console.log(
@@ -32,10 +34,15 @@ export class UserServiceService {
         return err;
         console.log('-----------------------------------');
       });
-    if (res) {
+    if (res.id) {
       const payload = { user: res.id, email: res.email };
 
-      return { USER: res };
+      return { USER : res};
+    } else {
+      return {
+        success: false,
+        message: 'There is some user not create ',
+      };
     }
   }
 
@@ -65,7 +72,7 @@ export class UserServiceService {
   // sign token
   async signtoken(payload: tokenPayLoad) {
     const token = this.jwt.sign(payload, {
-      expiresIn: '17m',
+      expiresIn: '40m',
       secret: process.env.secreat ?? 'xhbwhj#bjweec',
     });
     console.log(process.env);
@@ -118,20 +125,20 @@ export class UserServiceService {
   //   return { message: 'no user found' };
   // }
   async GetUser(id: string): Promise<GetUserResponse> {
-  const user = await this.prisma.user.findUnique({ where: { id } });
+    const user = await this.prisma.user.findUnique({ where: { id } });
 
-  if (user?.id) {
-    return {
-      id: user.id,
-      name: user.name,
-      email: user?.emailId,
-      userType: user.userType,
-      mobile_no: user.mobileNo,
-    };
+    if (user?.id) {
+      return {
+        id: user.id,
+        name: user.name,
+        email: user?.emailId,
+        userType: user.userType,
+        mobile_no: user.mobileNo,
+      };
+    }
+
+    return { message: 'no user found' }; // ✅ FIXED: lowercase message
   }
-
-  return { message: 'no user found' }; // ✅ FIXED: lowercase message
-}
 
   // varify token
   async verifyToken(token: string) {
@@ -139,7 +146,7 @@ export class UserServiceService {
       const res = this.jwt.verify(token, {
         secret: process.env.secreat ?? 'xhbwhj#bjweec',
       });
-      
+
       return {
         isValid: true,
         res,

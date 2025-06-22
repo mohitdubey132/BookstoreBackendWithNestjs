@@ -10,6 +10,7 @@ import {
   IsOptional,
   IsString,
   isString,
+  Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -25,6 +26,9 @@ export class User {
   name: string;
   @IsNotEmpty()
   @IsString()
+  @Matches(/^[6-9]\d{9}$/, {
+    message: 'mobile_no must be a valid 10-digit Indian mobile number',
+  })
   mobile_no: string;
 
   @IsEmail()
@@ -32,8 +36,9 @@ export class User {
   @IsNotEmpty()
   @IsString()
   hashPassword: string;
-  @IsEnum(UserTypes)
-  userType: UserTypes;
+  // @IsOptional()
+  // @IsEnum(UserTypes)
+  // userType: UserTypes;
 }
 
 export class Address_DTO {
@@ -59,10 +64,8 @@ export class Address_DTO {
 
 export class tokenPayLoad {
   @IsString()
-
   id: string;
   @IsString()
-
   userType: UserTypes;
 }
 export interface UserResponseDTO {
