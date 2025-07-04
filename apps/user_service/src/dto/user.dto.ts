@@ -1,3 +1,4 @@
+import { Prisma } from '../../generated/prisma/client';
 import {
   IS_EMAIL,
   IsEmail,
@@ -15,11 +16,18 @@ import {
   MinLength,
 } from 'class-validator';
 
+// export enum UserTypes {
+//   ADMIN = 'admin',
+//   CUSTOMER = 'normal',
+//   STAFF = 'staff',
+// }
+
 export enum UserTypes {
+  NORMAL = 'normal',
   ADMIN = 'admin',
-  CUSTOMER = 'normal',
   STAFF = 'staff',
 }
+
 export class User {
   @IsString()
   @IsNotEmpty()
@@ -66,6 +74,7 @@ export class tokenPayLoad {
   @IsString()
   id: string;
   @IsString()
+  @IsOptional()
   userType: UserTypes;
 }
 export interface UserResponseDTO {

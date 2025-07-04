@@ -22,9 +22,7 @@ export class UserServiceService {
           name: data.name,
           emailId: data.email,
           hashPassword: hash,
-
-        }
-        
+        },
       })
       .catch((err) => {
         console.log(
@@ -37,7 +35,7 @@ export class UserServiceService {
     if (res.id) {
       const payload = { user: res.id, email: res.email };
 
-      return { USER : res};
+      return { USER: res };
     } else {
       return {
         success: false,

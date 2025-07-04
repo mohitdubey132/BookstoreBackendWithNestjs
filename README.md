@@ -12,6 +12,10 @@ You can run these services individually for development or use Docker Compose to
 ### start docker service 
   docker compose up -d
 
+### Seed Product Table 
+```
+npx prisma db seed
+```
 
 ## 🚀 Start Services Individually (Development Mode)
 

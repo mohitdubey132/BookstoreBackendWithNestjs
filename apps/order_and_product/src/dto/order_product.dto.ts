@@ -13,6 +13,7 @@ import {
   isString,
   IsString,
   IsUUID,
+  Matches,
   Min,
   ValidateNested,
 } from 'class-validator';
@@ -24,7 +25,7 @@ export enum OrderStatus {
   SHIPPED = 'SHIPPED',
   DELIVERED = 'DELIVERED',
   CANCELLED = 'CANCELLED',
-  CANCEL_REQUESTED = "CANCEL_REQUESTED"
+  CANCEL_REQUESTED = 'CANCEL_REQUESTED',
 }
 
 export enum PaymentStatus {
@@ -246,7 +247,7 @@ export class ProductQueryDTO {
 export class ProductById {
   @IsString()
   @IsNotEmpty()
-  productId : string ;
+  productId: string;
 }
 
 export enum CartStatus {
@@ -325,13 +326,36 @@ export class ModifyCartItemDTO {
   @IsNotEmpty()
   token: string;
 }
-interface ShippingAddressDTO {
+export class ShippingAddressDTO {
+  @IsString()
+  @IsNotEmpty()
   firstName: string;
+
+  @IsString()
+  @IsNotEmpty()
   lastName: string;
+
+  @IsString()
+  @IsNotEmpty()
   landMark: string;
+
+  @IsString()
+  @IsNotEmpty()
   road: string;
+
+  @IsString()
+  @IsNotEmpty()
   city: string;
+
+  @IsString()
+  @IsNotEmpty()
   pinCode: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^[6-9]\d{9}$/, {
+    message: 'mobile_no must be a valid 10-digit Indian mobile number',
+  })
   mobileNo: string;
 }
 
@@ -356,37 +380,39 @@ export class PlaceOrderDTO {
   @IsNotEmpty()
   @IsString()
   token: string;
-
-  shippingAddress?: ShippingAddressDTO; // ✅ optional
+  @ValidateNested()
+  @Type(() => ShippingAddressDTO)
+  @IsOptional()
+  shippingAddress: ShippingAddressDTO; // ✅ optional
+   @IsOptional()
+  paymentMethod: 'COD' | 'RAZORPAY';
 }
 
-export class GetUserOrderDTO{
+export class GetUserOrderDTO {
   @IsString()
-  @IsNotEmpty({message:"Please login "})
-
-  token :String;
+  @IsNotEmpty({ message: 'Please login ' })
+  token: String;
   @IsOptional()
   @IsString()
-  userId : string;
+  userId: string;
 }
 
-export class GetOrdersDTO{
+export class GetOrdersDTO {
   @IsString()
-  @IsNotEmpty({message:"Please login "})
-  token :String;
+  @IsNotEmpty({ message: 'Please login ' })
+  token: String;
 }
-export class GetOrderDetails{
+export class GetOrderDetails {
   @IsString()
-  @IsNotEmpty({message:"Please login "})
-
-  token :String;
+  @IsNotEmpty({ message: 'Please login ' })
+  token: String;
   @IsOptional()
   @IsString()
-  userId : string;
+  userId: string;
 
   @IsString()
   @IsNotEmpty()
-  orderId : string;
+  orderId: string;
 }
 
 export class UpdateOrderStatusDTO extends GetOrderDetails {
@@ -395,15 +421,14 @@ export class UpdateOrderStatusDTO extends GetOrderDetails {
   status: OrderStatus;
 }
 
-
 export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
   name: string;
-  
+
   @IsNotEmpty()
   @IsString()
-  token :string ;
+  token: string;
   @IsOptional()
   @IsString()
   description?: string;
@@ -421,17 +446,16 @@ export class CreateProductDto {
   thumbnail?: string;
 }
 
-export class UpdateProductDto{
-    @IsString()
+export class UpdateProductDto {
+  @IsString()
   @IsNotEmpty()
   name: string;
   @IsNotEmpty()
   @IsString()
-
-  id:string
+  id: string;
   @IsNotEmpty()
   @IsString()
-  token :string ;
+  token: string;
   @IsOptional()
   @IsString()
   description?: string;
@@ -447,4 +471,24 @@ export class UpdateProductDto{
   @IsOptional()
   @IsString()
   thumbnail?: string;
+}
+export class VerifyPaymentDTO {
+   @IsNotEmpty()
+  @IsString()
+  token: string;
+  @IsNotEmpty()
+  @IsString()
+  razorpay_payment_id: string;
+
+  @IsNotEmpty()
+  @IsString()
+  razorpay_order_id: string;
+
+  @IsNotEmpty()
+  @IsString()
+  razorpay_signature: string;
+
+  @IsNotEmpty()
+  @IsString()
+  orderId: string;
 }

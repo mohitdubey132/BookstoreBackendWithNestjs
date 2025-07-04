@@ -23,14 +23,14 @@ export class UserServiceController {
       output = await this.userServiceService.createUser(data);
       if (output.USER?.id) {
         token = await this.userServiceService.signtoken({
-          id: output.id,
-          userType: output.userType,
+          id: output.USER?.id,
+          userType: output.USER?.userType,
         });
         return {
           success: true,
           user: output,
           message: ' User has been created ',
-          token:token
+          token: token,
         };
       } else {
         return {
@@ -105,17 +105,18 @@ export class UserServiceController {
     return { status: isValid.isValid, tokenIsValid: isValid };
   }
 
-    @MessagePattern('getuserInfo')
-  async getUserData( data:any) {
+  @MessagePattern('getuserInfo')
+  async getUserData(data: any) {
     // console.log(token,typeof(token.token))
     const isValid = await this.userServiceService.verifyToken(data?.token);
     let user: GetUserResponse;
     if (isValid.isValid) {
       user = await this.userServiceService.GetUser(isValid?.res?.id);
-      return { success:true , user: user , message:"user details" };
+      return { success: true, user: user, message: 'user details' };
     }
-    return { 
-      success: false , message:"User details not found please login again "
-     };
+    return {
+      success: false,
+      message: 'User details not found please login again ',
+    };
   }
 }

@@ -1,22 +1,61 @@
+// import { plainToInstance } from 'class-transformer';
+// import { validate } from 'class-validator';
+// import { BadRequestException } from '@nestjs/common';
+
+// export async function validatePayload<T>(
+//   dto: new () => T,
+//   payload: any,
+// ): Promise<T> {
+//   const object = plainToInstance(dto, payload);
+//   const errors = await validate(object ?? {});
+
+//   if (errors.length > 0) {
+//     const errorMessages = errors
+//       .map((e) =>
+//         e.constraints ? Object.values(e.constraints).join(', ') : '',
+//       )
+//       .filter(Boolean)
+//       .join(', ');
+
+//     throw new BadRequestException(errorMessages);
+//   }
+
+//   return object;
+// }
 import { plainToInstance } from 'class-transformer';
-import { validate } from 'class-validator';
+import { validate, ValidationError } from 'class-validator';
 import { BadRequestException } from '@nestjs/common';
+
+function extractValidationErrors(errors: ValidationError[]): string[] {
+  const messages: string[] = [];
+
+  for (const error of errors) {
+    if (error.constraints) {
+      messages.push(...Object.values(error.constraints));
+    }
+
+    if (error.children && error.children.length > 0) {
+      messages.push(...extractValidationErrors(error.children));
+    }
+  }
+
+  return messages;
+}
 
 export async function validatePayload<T>(
   dto: new () => T,
   payload: any,
 ): Promise<T> {
   const object = plainToInstance(dto, payload);
-  const errors = await validate(object ?? {});
+  const errors = await validate(object ?? {}, {
+    whitelist: true,
+    forbidNonWhitelisted: true,
+  });
 
   if (errors.length > 0) {
-    const errorMessages = errors
-      .map((e) =>
-        e.constraints ? Object.values(e.constraints).join(', ') : '',
-      )
+    const errorMessages = extractValidationErrors(errors)
       .filter(Boolean)
       .join(', ');
-
     throw new BadRequestException(errorMessages);
   }
 

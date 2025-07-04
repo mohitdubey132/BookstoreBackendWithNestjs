@@ -1,10 +1,18 @@
-import { Body, Controller, Get, Inject, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { ApiGatewayService } from './api-gateway.service';
 import { ClientProxy } from '@nestjs/microservices';
 import { catchError, firstValueFrom, throwError, timeout } from 'rxjs';
 import { sendWithTimeout } from './helper/sendWithTimeOut';
 
-@Controller("/api")
+@Controller('/api')
 export class ApiGatewayController {
   constructor(
     private readonly apiGatewayService: ApiGatewayService,
@@ -30,64 +38,73 @@ export class ApiGatewayController {
   // getUser orders  getUserOrders
   @Post('/userOrders')
   async getuserOrders(@Body() data: any) {
-   const result = await firstValueFrom(
+    const result = await firstValueFrom(
       sendWithTimeout(this.orderClient, 'getUserOrders', data),
     );
     return result;
   }
 
-    // getUser orders  getOrderDetails
+  // getUser orders  getOrderDetails
   @Post('/OrderDetails')
   async getOrderDetail(@Body() data: any) {
-   const result = await firstValueFrom(
+    const result = await firstValueFrom(
       sendWithTimeout(this.orderClient, 'getOrderDetails', data),
     );
     return result;
   }
 
-  @Post("/updateOrderStatus")
-   async updateOrderStatus(@Body () data:any){
-    const result  = await firstValueFrom(
-      sendWithTimeout(this.orderClient,"updateOrderStatus",data)
-    )
+  // verifyPayment
+    @Post('/verify-payment')
+  async verifyPaymentForOrder(@Body() data: any) {
+    const result = await firstValueFrom(
+      sendWithTimeout(this.orderClient, 'verifyPayment', data),
+    );
     return result;
-   }
-
-   @Post("/createProduct")
-   async createProduct(@Body () data:any){
-    const result = await firstValueFrom(
-      sendWithTimeout(this.orderClient,"createProduct",data)
-    )
-    return result ;
-   }
-     @Put("/Product")
-   async UpdateProduct(@Body () data:any){
-    const result = await firstValueFrom(
-      sendWithTimeout(this.orderClient,"updateProduct",data)
-    )
-    return result ;
-   }
-
-   @Get("/Product")
-  async GetProduct(@Query() data: any){
-        const result = await firstValueFrom(
-      sendWithTimeout(this.orderClient,"Product",data)
-    )
-    return result ;
   }
-   @Post ("/getOrderList")
-   async getOrders(@Body() data:any){
-    const result  = await firstValueFrom(
-      sendWithTimeout(this.orderClient,"getOrders",data)
-    )
-    return result ;
-   }
-  @Post('/userinfo')
-  async getuserinfo(@Body() data:any)
-  {
-  const result  = await firstValueFrom(sendWithTimeout(this.userClient,"getuserInfo",data))
+  @Post('/updateOrderStatus')
+  async updateOrderStatus(@Body() data: any) {
+    const result = await firstValueFrom(
+      sendWithTimeout(this.orderClient, 'updateOrderStatus', data),
+    );
+    return result;
+  }
 
-  return result
+  @Post('/createProduct')
+  async createProduct(@Body() data: any) {
+    const result = await firstValueFrom(
+      sendWithTimeout(this.orderClient, 'createProduct', data),
+    );
+    return result;
+  }
+  @Put('/Product')
+  async UpdateProduct(@Body() data: any) {
+    const result = await firstValueFrom(
+      sendWithTimeout(this.orderClient, 'updateProduct', data),
+    );
+    return result;
+  }
+
+  @Get('/Product')
+  async GetProduct(@Query() data: any) {
+    const result = await firstValueFrom(
+      sendWithTimeout(this.orderClient, 'Product', data),
+    );
+    return result;
+  }
+  @Post('/getOrderList')
+  async getOrders(@Body() data: any) {
+    const result = await firstValueFrom(
+      sendWithTimeout(this.orderClient, 'getOrders', data),
+    );
+    return result;
+  }
+  @Post('/userinfo')
+  async getuserinfo(@Body() data: any) {
+    const result = await firstValueFrom(
+      sendWithTimeout(this.userClient, 'getuserInfo', data),
+    );
+
+    return result;
   }
   @Post('/getCheckout')
   async getCheckout(@Body() data: any) {
