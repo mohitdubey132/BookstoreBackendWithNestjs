@@ -10,41 +10,47 @@ You can run these services individually for development or use Docker Compose to
 
 ---
 ### start docker service 
+```
   docker compose up -d
+```
 
-### Seed Product Table 
+## 🚀 Start Services Individually (Development Mode)
+Make sure you're in the project root directory before running the commands below.
+### migrate db for order and product service 
+##  apps/order_and_product
+npx prisma migrate deploy
+### ⚙️ run api-gateway 
+```
+npm i 
+npm run start:dev api-gateway
+```
+
+### ⚙️ run order service 
+```
+npm i
+cd apps/order_and_product
+npx prisma migrate deploy  
+cd ../..
+npm run start:dev order_and_product
+```
+### Seed Product Table in root folder 
 ```
 npx prisma db seed
 ```
 
-## 🚀 Start Services Individually (Development Mode)
-
-Make sure you're in the project root directory before running the commands below.
-
-### Start  Service
-```bash
+### ⚙️ run user_service service 
+```
+npm i 
+cd apps/user_service
+npx prisma migrate deploy  
+cd ../..
 npm run start:dev user_service
-npm run start:dev order_and_product
-npm run start:dev api-gateway
 ```
-
-
-### migrate db for order and product service 
-##  apps/order_and_product
-npx prisma migrate deploy
-
-### migrate db for user service 
-##  apps/user_service
-npx prisma migrate deploy
-
-
-
-### add .env file in apps/user_service with this key-vales 
+### add .env file  with this key-vales in root 
 ```
-DATABASE_URL="postgresql://user_admin:secret123@localhost:5435/user_db?schema=public"
-```
-### add .env file in apps/order_and_product with this key-vales 
-```
+DATABASE_URL1="postgresql://user_admin:secret123@localhost:5435/user_db?schema=public"
 DATABASE_URL="postgresql://order_admin:order123@localhost:5433/order_and_product?schema=public"
-
+RABBITMQ_URL="amqp://admin:admin@localhost:5672"
+RAZORPAY_KEY_ID="rzp_test_nV62MButqwbJQk"
+RAZORPAY_KEY_SECRET="X7mvwUKnkUmtkz0QWYCkzlbd"
 ```
